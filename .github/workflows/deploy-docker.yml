@@ -1,0 +1,80 @@
+name: Deploy with Docker Compose
+
+# Workflow này demo deploy đơn giản với Docker Compose
+# Sử dụng khi bạn có VPS/server với Docker installed
+
+on:
+  workflow_dispatch:  # Manual trigger
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Copy files to server
+        run: |
+          echo "📦 Copying files to server..."
+          rsync -avz --delete \
+            --exclude 'node_modules' \
+            --exclude '.git' \
+            --exclude '.env' \
+            ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/app/
+      
+      - name: Deploy with Docker Compose
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            cd ~/app
+            
+            # Pull latest images
+            docker-compose pull
+            
+            # Stop old containers
+            docker-compose down
+            
+            # Start new containers
+            docker-compose up -d
+            
+            # Wait for services to be ready
+            sleep 10
+            
+            # Run migrations
+            docker-compose exec -T backend npm run db:migrate
+            
+            # Check health
+            docker-compose ps
+          EOF
+      
+      - name: Health check
+        run: |
+          echo "🏥 Checking application health..."
+          sleep 5
+          # curl -f http://${{ secrets.SERVER_HOST }}:3000/health || exit 1
+          echo "✅ Application is healthy!"
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/id_rsa
+

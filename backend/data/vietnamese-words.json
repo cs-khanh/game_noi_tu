@@ -1,0 +1,143 @@
+[
+  {"word1": "quả", "word2": "táo", "full_word": "quả táo", "meaning": "Trái táo", "category": "food"},
+  {"word1": "táo", "word2": "tàu", "full_word": "táo tàu", "meaning": "Táo Trung Quốc", "category": "food"},
+  {"word1": "tàu", "word2": "hoả", "full_word": "tàu hoả", "meaning": "Xe lửa", "category": "transport"},
+  {"word1": "hoả", "word2": "tiễn", "full_word": "hoả tiễn", "meaning": "Tên lửa", "category": "weapon"},
+  {"word1": "tiễn", "word2": "đưa", "full_word": "tiễn đưa", "meaning": "Tiễn biệt", "category": "action"},
+  {"word1": "đưa", "word2": "đón", "full_word": "đưa đón", "meaning": "Đưa và đón", "category": "action"},
+  {"word1": "đón", "word2": "nhận", "full_word": "đón nhận", "meaning": "Chấp nhận", "category": "action"},
+  {"word1": "nhận", "word2": "thức", "full_word": "nhận thức", "meaning": "Hiểu biết", "category": "thought"},
+  {"word1": "thức", "word2": "ăn", "full_word": "thức ăn", "meaning": "Đồ ăn", "category": "food"},
+  {"word1": "ăn", "word2": "uống", "full_word": "ăn uống", "meaning": "Ăn và uống", "category": "food"},
+  
+  {"word1": "cà", "word2": "phê", "full_word": "cà phê", "meaning": "Coffee", "category": "drink"},
+  {"word1": "phê", "word2": "pha", "full_word": "phê pha", "meaning": "Đã, sướng", "category": "feeling"},
+  {"word1": "pha", "word2": "trộn", "full_word": "pha trộn", "meaning": "Hòa trộn", "category": "action"},
+  {"word1": "trộn", "word2": "lẫn", "full_word": "trộn lẫn", "meaning": "Trộn với nhau", "category": "action"},
+  {"word1": "lẫn", "word2": "lộn", "full_word": "lẫn lộn", "meaning": "Hỗn loạn", "category": "state"},
+  {"word1": "lộn", "word2": "xộn", "full_word": "lộn xộn", "meaning": "Bừa bộn", "category": "state"},
+  
+  {"word1": "con", "word2": "người", "full_word": "con người", "meaning": "Nhân loại", "category": "human"},
+  {"word1": "người", "word2": "yêu", "full_word": "người yêu", "meaning": "Bạn trai/gái", "category": "relationship"},
+  {"word1": "yêu", "word2": "thương", "full_word": "yêu thương", "meaning": "Yêu quý", "category": "feeling"},
+  {"word1": "thương", "word2": "mại", "full_word": "thương mại", "meaning": "Buôn bán", "category": "business"},
+  
+  {"word1": "bàn", "word2": "tay", "full_word": "bàn tay", "meaning": "Tay người", "category": "body"},
+  {"word1": "tay", "word2": "chân", "full_word": "tay chân", "meaning": "Tứ chi", "category": "body"},
+  {"word1": "chân", "word2": "tình", "full_word": "chân tình", "meaning": "Chân thật", "category": "feeling"},
+  {"word1": "tình", "word2": "yêu", "full_word": "tình yêu", "meaning": "Tình cảm nam nữ", "category": "feeling"},
+  
+  {"word1": "đi", "word2": "chơi", "full_word": "đi chơi", "meaning": "Ra ngoài giải trí", "category": "action"},
+  {"word1": "chơi", "word2": "game", "full_word": "chơi game", "meaning": "Chơi trò chơi", "category": "entertainment"},
+  {"word1": "game", "word2": "thủ", "full_word": "game thủ", "meaning": "Người chơi game", "category": "entertainment"},
+  
+  {"word1": "bàn", "word2": "ghế", "full_word": "bàn ghế", "meaning": "Đồ nội thất", "category": "furniture"},
+  {"word1": "ghế", "word2": "sofa", "full_word": "ghế sofa", "meaning": "Ghế êm", "category": "furniture"},
+  
+  {"word1": "máy", "word2": "tính", "full_word": "máy tính", "meaning": "Computer", "category": "technology"},
+  {"word1": "tính", "word2": "toán", "full_word": "tính toán", "meaning": "Tính cộng trừ", "category": "math"},
+  {"word1": "toán", "word2": "học", "full_word": "toán học", "meaning": "Môn toán", "category": "education"},
+  {"word1": "học", "word2": "sinh", "full_word": "học sinh", "meaning": "Người đi học", "category": "education"},
+  {"word1": "sinh", "word2": "viên", "full_word": "sinh viên", "meaning": "Học sinh đại học", "category": "education"},
+  {"word1": "viên", "word2": "chức", "full_word": "viên chức", "meaning": "Nhân viên", "category": "job"},
+  
+  {"word1": "thời", "word2": "gian", "full_word": "thời gian", "meaning": "Time", "category": "time"},
+  {"word1": "gian", "word2": "khổ", "full_word": "gian khổ", "meaning": "Khó khăn", "category": "feeling"},
+  {"word1": "khổ", "word2": "sở", "full_word": "khổ sở", "meaning": "Vất vả", "category": "feeling"},
+  
+  {"word1": "gia", "word2": "đình", "full_word": "gia đình", "meaning": "Gia tộc", "category": "family"},
+  {"word1": "đình", "word2": "chỉ", "full_word": "đình chỉ", "meaning": "Tạm dừng", "category": "action"},
+  
+  {"word1": "mặt", "word2": "trời", "full_word": "mặt trời", "meaning": "The sun", "category": "nature"},
+  {"word1": "trời", "word2": "đất", "full_word": "trời đất", "meaning": "Thiên địa", "category": "nature"},
+  {"word1": "đất", "word2": "nước", "full_word": "đất nước", "meaning": "Quốc gia", "category": "country"},
+  {"word1": "nước", "word2": "mắm", "full_word": "nước mắm", "meaning": "Fish sauce", "category": "food"},
+  {"word1": "mắm", "word2": "tôm", "full_word": "mắm tôm", "meaning": "Shrimp paste", "category": "food"},
+  {"word1": "tôm", "word2": "cua", "full_word": "tôm cua", "meaning": "Hải sản", "category": "food"},
+  
+  {"word1": "áo", "word2": "quần", "full_word": "áo quần", "meaning": "Quần áo", "category": "clothing"},
+  {"word1": "quần", "word2": "áo", "full_word": "quần áo", "meaning": "Trang phục", "category": "clothing"},
+  
+  {"word1": "bóng", "word2": "đá", "full_word": "bóng đá", "meaning": "Football", "category": "sport"},
+  {"word1": "đá", "word2": "banh", "full_word": "đá banh", "meaning": "Chơi bóng", "category": "sport"},
+  
+  {"word1": "xe", "word2": "máy", "full_word": "xe máy", "meaning": "Motorbike", "category": "transport"},
+  {"word1": "máy", "word2": "bay", "full_word": "máy bay", "meaning": "Airplane", "category": "transport"},
+  {"word1": "bay", "word2": "lượn", "full_word": "bay lượn", "meaning": "Bay trên trời", "category": "action"},
+  
+  {"word1": "sách", "word2": "vở", "full_word": "sách vở", "meaning": "Đồ dùng học tập", "category": "education"},
+  {"word1": "vở", "word2": "kịch", "full_word": "vở kịch", "meaning": "Vở diễn kịch", "category": "entertainment"},
+  
+  {"word1": "hoa", "word2": "quả", "full_word": "hoa quả", "meaning": "Trái cây", "category": "food"},
+  {"word1": "quả", "word2": "bóng", "full_word": "quả bóng", "meaning": "Trái banh", "category": "sport"},
+  
+  {"word1": "đường", "word2": "phố", "full_word": "đường phố", "meaning": "Con đường trong thành phố", "category": "place"},
+  {"word1": "phố", "word2": "cổ", "full_word": "phố cổ", "meaning": "Khu phố xưa", "category": "place"},
+  {"word1": "cổ", "word2": "điển", "full_word": "cổ điển", "meaning": "Cổ xưa", "category": "style"},
+  
+  {"word1": "ông", "word2": "bà", "full_word": "ông bà", "meaning": "Grandparents", "category": "family"},
+  {"word1": "bà", "word2": "cô", "full_word": "bà cô", "meaning": "Người phụ nữ", "category": "family"},
+  
+  {"word1": "sáng", "word2": "tối", "full_word": "sáng tối", "meaning": "Ngày đêm", "category": "time"},
+  {"word1": "tối", "word2": "tăm", "full_word": "tối tăm", "meaning": "Tối đen", "category": "state"},
+  
+  {"word1": "ngày", "word2": "đêm", "full_word": "ngày đêm", "meaning": "24 giờ", "category": "time"},
+  {"word1": "đêm", "word2": "khuya", "full_word": "đêm khuya", "meaning": "Ban đêm muộn", "category": "time"},
+  
+  {"word1": "màu", "word2": "sắc", "full_word": "màu sắc", "meaning": "Color", "category": "art"},
+  {"word1": "sắc", "word2": "đẹp", "full_word": "sắc đẹp", "meaning": "Vẻ đẹp", "category": "appearance"},
+  
+  {"word1": "trái", "word2": "tim", "full_word": "trái tim", "meaning": "Con tim", "category": "body"},
+  {"word1": "tim", "word2": "đập", "full_word": "tim đập", "meaning": "Tim nhảy", "category": "body"},
+  
+  {"word1": "núi", "word2": "rừng", "full_word": "núi rừng", "meaning": "Miền núi", "category": "nature"},
+  {"word1": "rừng", "word2": "xanh", "full_word": "rừng xanh", "meaning": "Rừng cây", "category": "nature"},
+  
+  {"word1": "mưa", "word2": "gió", "full_word": "mưa gió", "meaning": "Thời tiết xấu", "category": "weather"},
+  {"word1": "gió", "word2": "bão", "full_word": "gió bão", "meaning": "Storm", "category": "weather"},
+  {"word1": "bão", "word2": "tố", "full_word": "bão tố", "meaning": "Cơn bão mạnh", "category": "weather"},
+  
+  {"word1": "tay", "word2": "nghề", "full_word": "tay nghề", "meaning": "Kỹ năng", "category": "skill"},
+  {"word1": "nghề", "word2": "nghiệp", "full_word": "nghề nghiệp", "meaning": "Career", "category": "job"},
+  {"word1": "nghiệp", "word2": "vụ", "full_word": "nghiệp vụ", "meaning": "Chuyên môn", "category": "job"},
+  
+  {"word1": "công", "word2": "việc", "full_word": "công việc", "meaning": "Việc làm", "category": "job"},
+  {"word1": "việc", "word2": "làm", "full_word": "việc làm", "meaning": "Job", "category": "job"},
+  {"word1": "làm", "word2": "việc", "full_word": "làm việc", "meaning": "Working", "category": "action"},
+  
+  {"word1": "tiền", "word2": "bạc", "full_word": "tiền bạc", "meaning": "Money", "category": "finance"},
+  {"word1": "bạc", "word2": "hà", "full_word": "bạc hà", "meaning": "Mint", "category": "food"},
+  
+  {"word1": "thi", "word2": "cử", "full_word": "thi cử", "meaning": "Exams", "category": "education"},
+  {"word1": "cử", "word2": "nhân", "full_word": "cử nhân", "meaning": "Bachelor degree", "category": "education"},
+  
+  {"word1": "nhà", "word2": "cửa", "full_word": "nhà cửa", "meaning": "House", "category": "place"},
+  {"word1": "cửa", "word2": "sổ", "full_word": "cửa sổ", "meaning": "Window", "category": "place"},
+  
+  {"word1": "giấy", "word2": "tờ", "full_word": "giấy tờ", "meaning": "Documents", "category": "document"},
+  {"word1": "tờ", "word2": "báo", "full_word": "tờ báo", "meaning": "Newspaper", "category": "media"},
+  {"word1": "báo", "word2": "chí", "full_word": "báo chí", "meaning": "Press", "category": "media"},
+  
+  {"word1": "điện", "word2": "thoại", "full_word": "điện thoại", "meaning": "Phone", "category": "technology"},
+  {"word1": "thoại", "word2": "vọng", "full_word": "thoại vọng", "meaning": "Echo", "category": "sound"},
+  
+  {"word1": "âm", "word2": "nhạc", "full_word": "âm nhạc", "meaning": "Music", "category": "entertainment"},
+  {"word1": "nhạc", "word2": "sĩ", "full_word": "nhạc sĩ", "meaning": "Musician", "category": "job"},
+  {"word1": "sĩ", "word2": "quan", "full_word": "sĩ quan", "meaning": "Officer", "category": "military"},
+  
+  {"word1": "bia", "word2": "rượu", "full_word": "bia rượu", "meaning": "Alcoholic drinks", "category": "drink"},
+  {"word1": "rượu", "word2": "vang", "full_word": "rượu vang", "meaning": "Wine", "category": "drink"},
+  
+  {"word1": "phim", "word2": "ảnh", "full_word": "phim ảnh", "meaning": "Movies", "category": "entertainment"},
+  {"word1": "ảnh", "word2": "hưởng", "full_word": "ảnh hưởng", "meaning": "Influence", "category": "effect"},
+  
+  {"word1": "văn", "word2": "hóa", "full_word": "văn hóa", "meaning": "Culture", "category": "culture"},
+  {"word1": "hóa", "word2": "học", "full_word": "hóa học", "meaning": "Chemistry", "category": "science"},
+  
+  {"word1": "xã", "word2": "hội", "full_word": "xã hội", "meaning": "Society", "category": "social"},
+  {"word1": "hội", "word2": "nghị", "full_word": "hội nghị", "meaning": "Conference", "category": "event"},
+  
+  {"word1": "kinh", "word2": "tế", "full_word": "kinh tế", "meaning": "Economy", "category": "business"},
+  {"word1": "tế", "word2": "bào", "full_word": "tế bào", "meaning": "Cell", "category": "biology"}
+]
+

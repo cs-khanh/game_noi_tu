@@ -1,0 +1,18 @@
+version: '3.8'
+
+# Production override for Cloudflare Tunnel
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  # Backend - no changes needed, CORS already configured
+  backend:
+    environment:
+      NODE_ENV: production
+      # CORS_ORIGIN already has both domains
+
+  # Frontend - use Cloudflare domains
+  frontend:
+    environment:
+      VITE_API_URL: https://apinoitu.khanhcs.id.vn
+      VITE_WS_URL: https://apinoitu.khanhcs.id.vn
+
