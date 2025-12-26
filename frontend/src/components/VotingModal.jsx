@@ -32,7 +32,7 @@ function VotingModal({ votingData, onVote, myId }) {
         {/* Word */}
         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg p-6 mb-6 text-center">
           <p className="text-sm text-gray-600 mb-2">Từ đề xuất:</p>
-          <p className="text-3xl font-bold text-gray-800 mb-2">"{votingData.word}"</p>
+          <p className="text-3xl font-bold text-gray-800 mb-2">&quot;{votingData.word}&quot;</p>
           <p className="text-sm text-gray-600">bởi {votingData.proposedBy}</p>
         </div>
 
