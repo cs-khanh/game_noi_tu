@@ -1,5 +1,3 @@
-const request = require('supertest')
-
 describe('Basic Tests', () => {
   test('Placeholder test - should pass', () => {
     expect(true).toBe(true)

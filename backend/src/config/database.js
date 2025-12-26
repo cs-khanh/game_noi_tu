@@ -44,7 +44,6 @@ async function query(text, params) {
 
 async function getClient() {
   const client = await pool.connect();
-  const query = client.query.bind(client);
   const release = client.release.bind(client);
   
   // Set a timeout to release connection

@@ -125,7 +125,7 @@ class Room {
     logger.info(`Game started in room ${this.id}`);
   }
 
-  endGame(winnerId) {
+  endGame(_winnerId) {
     this.gameStarted = false;
     this.clearTurnTimer();
     logger.info(`Game ended in room ${this.id}`);
