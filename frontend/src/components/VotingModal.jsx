@@ -87,7 +87,7 @@ function VotingModal({ votingData, onVote, myId }) {
         )}
 
         <p className="text-xs text-center text-gray-500 mt-4">
-          Cần >50% vote "Chấp nhận" để từ được thêm vào từ điển
+          Cần {'>'}50% vote &quot;Chấp nhận&quot; để từ được thêm vào từ điển
         </p>
       </div>
     </div>

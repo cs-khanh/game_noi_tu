@@ -113,7 +113,7 @@ function HomePage() {
             </li>
             <li className="flex items-start">
               <span className="mr-2">🗳️</span>
-              <span>Từ mới cần >50% vote để chấp nhận</span>
+              <span>Từ mới cần {'>'}50% vote để chấp nhận</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">🏆</span>

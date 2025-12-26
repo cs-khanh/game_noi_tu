@@ -73,7 +73,7 @@ function GamePage() {
     })
 
     // Game started
-    socket.on('game_started', ({ turnOrder, firstWord, currentPlayer: cp, timeLeft: tl }) => {
+    socket.on('game_started', ({ firstWord, currentPlayer: cp, timeLeft: tl }) => {
       console.log('Game started!')
       setGameStarted(true)
       setWordsHistory([{ word: firstWord, playerName: 'System', timestamp: new Date().toISOString() }])
@@ -90,7 +90,7 @@ function GamePage() {
     })
 
     // Word submitted
-    socket.on('word_submitted', ({ word, playerName, wordsChain }) => {
+    socket.on('word_submitted', ({ word, wordsChain }) => {
       setWordsHistory(wordsChain || [])
       setCurrentWord(word)
     })
@@ -124,7 +124,7 @@ function GamePage() {
     })
 
     // Voting ended
-    socket.on('voting_ended', ({ approved }) => {
+    socket.on('voting_ended', () => {
       // Đóng popup ngay khi voting kết thúc
       setVotingData(null)
     })
@@ -181,7 +181,6 @@ function GamePage() {
   const isMyTurn = currentPlayer?.id === myId
   const myPlayer = players.find(p => p.id === myId)
   const isHost = myPlayer?.isHost || false
-  const allPlayersReady = players.length >= 2 && players.filter(p => !p.isHost).every(p => p.isReady)
 
   return (
     <div className="min-h-screen p-4">

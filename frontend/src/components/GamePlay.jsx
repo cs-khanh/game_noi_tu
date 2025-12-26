@@ -50,7 +50,7 @@ function GamePlay({ currentPlayer, currentWord, timeLeft, isMyTurn, myPlayer, on
           {currentWord}
         </div>
         <div className="text-sm text-gray-600">
-          → Từ tiếp theo phải bắt đầu bằng: <span className="font-bold text-blue-600">"{lastWord}"</span>
+          → Từ tiếp theo phải bắt đầu bằng: <span className="font-bold text-blue-600">&quot;{lastWord}&quot;</span>
         </div>
       </div>
 
