@@ -2,7 +2,7 @@
 
 Game nối từ ghép trực tuyến nhiều người chơi với hệ thống voting cộng đồng.
 
-[![CI/CD Status](https://github.com/yourusername/noi-tu-lien-hoan/workflows/CI/badge.svg)](https://github.com/yourusername/noi-tu-lien-hoan/actions)
+[![CI/CD Status](https://github.com/yourusername/noi-tu-lien-hoan/workflows/CI/badge.svg)](https://github.com/cs-khanh/game_noi_tu/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 📖 Giới thiệu

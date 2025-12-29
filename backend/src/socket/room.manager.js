@@ -43,6 +43,14 @@ class Room {
       player.isHost = false;
     }
 
+    // Nếu game đang chạy, đánh dấu là spectator (người xem)
+    if (this.gameStarted) {
+      player.isSpectator = true;
+      logger.info(`Player ${player.username} joined as SPECTATOR (game in progress)`);
+    } else {
+      player.isSpectator = false;
+    }
+
     this.players.push(player);
     logger.info(`Player ${player.username} added to room ${this.id}`);
     return player;

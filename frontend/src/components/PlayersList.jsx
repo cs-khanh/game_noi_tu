@@ -1,4 +1,9 @@
 function PlayersList({ players, currentPlayer, myId }) {
+  const truncateName = (name, maxLength = 12) => {
+    if (name.length <= maxLength) return name
+    return name.substring(0, maxLength) + '...'
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <h3 className="text-lg font-bold mb-4">👥 Người chơi ({players.length})</h3>
@@ -7,6 +12,7 @@ function PlayersList({ players, currentPlayer, myId }) {
           const isCurrentPlayer = currentPlayer?.id === player.id
           const isMe = player.id === myId
           const isDisabled = player.isDisabled
+          const isSpectator = player.isSpectator
 
           return (
             <div
@@ -16,6 +22,8 @@ function PlayersList({ players, currentPlayer, myId }) {
                   ? 'border-blue-500 bg-blue-50'
                   : isDisabled
                   ? 'border-gray-300 bg-gray-100 opacity-60'
+                  : isSpectator
+                  ? 'border-purple-300 bg-purple-50'
                   : 'border-gray-300'
               }`}
             >
@@ -26,13 +34,16 @@ function PlayersList({ players, currentPlayer, myId }) {
                   className="w-12 h-12 rounded-full"
                 />
                 <div className="flex-1">
-                  <p className="font-semibold text-black">
-                    {player.username}
+                  <p className="font-semibold text-black" title={player.username}>
+                    {truncateName(player.username)}
                     {player.isHost && <span className="ml-1">👑</span>}
                     {isMe && <span className="ml-1 text-xs text-blue-600">(Bạn)</span>}
+                    {isSpectator && <span className="ml-1 text-xs text-purple-600">👁️</span>}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {isDisabled ? (
+                    {isSpectator ? (
+                      <span className="text-purple-600">👁️ Đang xem...</span>
+                    ) : isDisabled ? (
                       <span className="text-red-600">💀 Bị vô hiệu hóa</span>
                     ) : isCurrentPlayer ? (
                       <span className="text-blue-600">🎯 Đang chơi...</span>

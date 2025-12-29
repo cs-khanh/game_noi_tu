@@ -181,6 +181,7 @@ function GamePage() {
   const isMyTurn = currentPlayer?.id === myId
   const myPlayer = players.find(p => p.id === myId)
   const isHost = myPlayer?.isHost || false
+  const isSpectator = myPlayer?.isSpectator || false
 
   return (
     <div className="min-h-screen p-4">
@@ -189,7 +190,10 @@ function GamePage() {
         <div className="bg-white rounded-lg shadow-md p-4 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">🎮 Nối Từ Liên Hoàn</h1>
-            <p className="text-sm text-gray-600">Phòng: <span className="font-mono font-bold">{roomId}</span></p>
+            <p className="text-sm text-gray-600">
+              Phòng: <span className="font-mono font-bold">{roomId}</span>
+              {isSpectator && <span className="ml-2 px-2 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded">👁️ Chế độ xem</span>}
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -310,12 +314,20 @@ function GamePage() {
               <p>Tổng số từ: {wordsHistory.length}</p>
               <p>Từ mới được thêm: {wordsHistory.filter(w => w.isNew).length}</p>
             </div>
-            <button
-              onClick={() => navigate('/')}
-              className="bg-blue-500 text-white py-3 px-8 rounded-lg font-semibold hover:bg-blue-600"
-            >
-              Về trang chủ
-            </button>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-green-500 text-white py-3 px-8 rounded-lg font-semibold hover:bg-green-600"
+              >
+                🔄 Quay lại phòng
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="bg-blue-500 text-white py-3 px-8 rounded-lg font-semibold hover:bg-blue-600"
+              >
+                🏠 Về trang chủ
+              </button>
+            </div>
           </div>
         ) : (
           /* In Game */
@@ -327,13 +339,25 @@ function GamePage() {
 
             {/* Game Play Area */}
             <div className="lg:col-span-2 space-y-4">
+              {isSpectator && (
+                <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                  <p className="text-center font-semibold text-purple-800">
+                    👁️ Bạn đang ở chế độ xem. Game đã bắt đầu trước khi bạn vào phòng.
+                  </p>
+                  <p className="text-center text-sm text-purple-600 mt-1">
+                    Bạn sẽ có thể chơi vào ván tiếp theo!
+                  </p>
+                </div>
+              )}
+              
               <GamePlay
                 currentPlayer={currentPlayer}
                 currentWord={currentWord}
                 timeLeft={timeLeft}
-                isMyTurn={isMyTurn}
+                isMyTurn={isMyTurn && !isSpectator}
                 myPlayer={myPlayer}
                 onSubmitWord={handleSubmitWord}
+                isSpectator={isSpectator}
               />
               
               <WordHistory words={wordsHistory} />

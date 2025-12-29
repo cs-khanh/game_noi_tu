@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react'
 
-function GamePlay({ currentPlayer, currentWord, timeLeft, isMyTurn, myPlayer, onSubmitWord }) {
+function GamePlay({ currentPlayer, currentWord, timeLeft, isMyTurn, myPlayer, onSubmitWord, isSpectator = false }) {
   const [inputWord, setInputWord] = useState('')
   const [error, setError] = useState('')
+
+  const truncateName = (name, maxLength = 15) => {
+    if (!name || name.length <= maxLength) return name
+    return name.substring(0, maxLength) + '...'
+  }
 
   // Get the last word of current word to know what to start with
   const wordsArray = currentWord.split(' ')
@@ -39,7 +44,7 @@ function GamePlay({ currentPlayer, currentWord, timeLeft, isMyTurn, myPlayer, on
     setError('')
   }
 
-  const isDisabled = myPlayer?.isDisabled
+  const isDisabled = myPlayer?.isDisabled || isSpectator
 
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -76,8 +81,8 @@ function GamePlay({ currentPlayer, currentWord, timeLeft, isMyTurn, myPlayer, on
           </div>
         ) : (
           <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
-            <p className="text-lg font-semibold text-black">
-              Lượt của: {currentPlayer?.username || '...'}
+            <p className="text-lg font-semibold text-black" title={currentPlayer?.username}>
+              Lượt của: {truncateName(currentPlayer?.username) || '...'}
             </p>
             <p className="text-sm text-gray-600">Bạn đang chờ...</p>
           </div>

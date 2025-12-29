@@ -35,49 +35,52 @@ function HomePage() {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-gray-800 mb-2">
-            🎮 Nối Từ Liên Hoàn
+          <h1 className="text-5xl font-bold text-gray-800 mb-2 whitespace-nowrap">
+            🎮 Nối Từ Ghép
           </h1>
           <p className="text-gray-600">
-            Game nối từ ghép nhiều người chơi
+            Game nối từ nhiều người chơi
           </p>
         </div>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          {/* Username Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tên của bạn
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Nhập tên..."
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            />
-          </div>
+        {/* Username Input */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Tên của bạn
+          </label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Nhập tên..."
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          />
+        </div>
 
-          {/* Create Room Button */}
+        {/* Create Room Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-4">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">🎮 Tạo phòng mới</h2>
           <button
             onClick={handleCreateRoom}
-            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg mb-4"
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg"
           >
             Tạo phòng mới
           </button>
+        </div>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">hoặc</span>
-            </div>
+        {/* Divider */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t-2 border-gray-300"></div>
           </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-600 font-semibold rounded-full">hoặc</span>
+          </div>
+        </div>
 
-          {/* Join Room */}
+        {/* Join Room Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-blue-500">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">🚪 Tham gia phòng</h2>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Mã phòng
@@ -86,14 +89,14 @@ function HomePage() {
               type="text"
               value={roomId}
               onChange={(e) => setRoomId(e.target.value.toUpperCase())}
-              placeholder="Nhập mã phòng..."
+              placeholder="NHẬP MÃ PHÒNG..."
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none uppercase"
             />
           </div>
 
           <button
             onClick={handleJoinRoom}
-            className="w-full bg-white border-2 border-blue-500 text-blue-500 py-3 px-6 rounded-lg font-semibold hover:bg-blue-50 transition-all"
+            className="w-full bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 transition-all"
           >
             Tham gia phòng
           </button>

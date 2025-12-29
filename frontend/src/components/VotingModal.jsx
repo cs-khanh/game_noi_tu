@@ -4,6 +4,11 @@ function VotingModal({ votingData, onVote, myId }) {
   const [hasVoted, setHasVoted] = useState(false)
   const [timeLeft, setTimeLeft] = useState(votingData.timeLeft)
   
+  const truncateName = (name, maxLength = 15) => {
+    if (!name || name.length <= maxLength) return name
+    return name.substring(0, maxLength) + '...'
+  }
+  
   // Check if current user is the proposer
   const isProposer = myId === votingData.proposedById
 
@@ -33,7 +38,7 @@ function VotingModal({ votingData, onVote, myId }) {
         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-lg p-6 mb-6 text-center">
           <p className="text-sm text-gray-600 mb-2">Từ đề xuất:</p>
           <p className="text-3xl font-bold text-gray-800 mb-2">&quot;{votingData.word}&quot;</p>
-          <p className="text-sm text-gray-600">bởi {votingData.proposedBy}</p>
+          <p className="text-sm text-gray-600" title={votingData.proposedBy}>bởi {truncateName(votingData.proposedBy)}</p>
         </div>
 
         {/* Timer */}

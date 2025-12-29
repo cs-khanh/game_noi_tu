@@ -3,6 +3,11 @@ import { useState } from 'react'
 function WordHistory({ words }) {
   const [searchTerm, setSearchTerm] = useState('')
 
+  const truncateName = (name, maxLength = 10) => {
+    if (!name || name.length <= maxLength) return name
+    return name.substring(0, maxLength) + '...'
+  }
+
   const filteredWords = words.filter((item) =>
     item.word.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -41,7 +46,7 @@ function WordHistory({ words }) {
                   <span className="font-semibold text-black">{index + 1}. {item.word}</span>
                   {item.isNew && <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">⭐ Mới</span>}
                 </div>
-                <span className="text-sm text-black">👤 {item.playerName}</span>
+                <span className="text-sm text-black" title={item.playerName}>👤 {truncateName(item.playerName)}</span>
               </div>
             </div>
           ))
