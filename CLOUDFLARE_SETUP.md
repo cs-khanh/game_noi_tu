@@ -54,7 +54,7 @@ dig noitu.khanhcs.id.vn
 
 ### **C. GitHub Pages Settings:**
 
-1. Vào repo: `https://github.com/cs-khanh/demo_ci_cd/settings/pages`
+1. Vào repo: `https://github.com/cs-khanh/game_noi_tu/settings/pages`
 2. **Custom domain**: Nhập `noitu.khanhcs.id.vn`
 3. Click **Save**
 4. Đợi DNS check (~5-10 phút)

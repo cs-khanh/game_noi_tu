@@ -5,7 +5,7 @@
 ```
 GitHub Pages
   - https://noitu.khanhcs.id.vn (custom domain)
-  - https://cs-khanh.github.io/demo_ci_cd/ (default)
+  - https://cs-khanh.github.io/game_noi_tu/ (default)
     ↓
 Frontend React (static files)
   ↓ API calls
@@ -22,7 +22,7 @@ PostgreSQL + Redis
 
 ### Bước 1: Enable GitHub Pages
 
-1. Vào repo Settings: `https://github.com/cs-khanh/demo_ci_cd/settings/pages`
+1. Vào repo Settings: `https://github.com/cs-khanh/game_noi_tu/settings/pages`
 2. **Source**: Chọn **GitHub Actions**
 3. Save
 
@@ -50,7 +50,7 @@ PostgreSQL + Redis
 
 **Sau khi setup xong, cả 2 URLs đều hoạt động:**
 - `https://noitu.khanhcs.id.vn/` ← Custom domain
-- `https://cs-khanh.github.io/demo_ci_cd/` ← Default
+- `https://cs-khanh.github.io/game_noi_tu/` ← Default
 
 ### Bước 2: Push code
 
@@ -61,7 +61,7 @@ git push origin main
 ```
 
 Workflow sẽ tự động chạy và deploy frontend lên:
-- `https://cs-khanh.github.io/demo_ci_cd/` (default)
+- `https://cs-khanh.github.io/game_noi_tu/` (default)
 - `https://noitu.khanhcs.id.vn/` (custom domain - nếu đã setup)
 
 ---
@@ -145,7 +145,7 @@ Backend sẽ accept requests từ:
 ## ✅ **5. Verify Deployment**
 
 ### Frontend (GitHub Pages):
-- URL Default: `https://cs-khanh.github.io/demo_ci_cd/`
+- URL Default: `https://cs-khanh.github.io/game_noi_tu/`
 - URL Custom: `https://noitu.khanhcs.id.vn/` (nếu đã setup)
 - Check: Trang web load được
 
@@ -206,7 +206,7 @@ docker-compose -f docker-compose.backend.yml up -d
 cloudflared tunnel run noitu
 ```
 
-- Frontend: `https://noitu.khanhcs.id.vn/` hoặc `https://cs-khanh.github.io/demo_ci_cd/` (GitHub Pages)
+- Frontend: `https://noitu.khanhcs.id.vn/` hoặc `https://cs-khanh.github.io/game_noi_tu/` (GitHub Pages)
 - Backend: `https://apinoitu.khanhcs.id.vn` (Cloudflare Tunnel)
 
 ---

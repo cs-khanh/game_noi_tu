@@ -52,8 +52,8 @@ jobs:
           # Backend API URLs (Cloudflare Tunnel - local machine)
           VITE_API_URL: https://apinoitu.khanhcs.id.vn
           VITE_WS_URL: https://apinoitu.khanhcs.id.vn
-          # For GitHub Pages base path
-          BASE_URL: /demo_ci_cd/
+          # For GitHub Pages base path (repo name: game_noi_tu)
+          BASE_URL: /game_noi_tu/
         run: npm run build
       
       - name: Setup Pages
