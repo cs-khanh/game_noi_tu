@@ -3,11 +3,13 @@
 ## Kiến trúc deployment:
 
 ```
-GitHub Pages (noitu.khanhcs.id.vn)
-  ↓
+GitHub Pages
+  - https://noitu.khanhcs.id.vn (custom domain)
+  - https://cs-khanh.github.io/demo_ci_cd/ (default)
+    ↓
 Frontend React (static files)
   ↓ API calls
-Cloudflare Tunnel (apinoitu.khanhcs.id.vn)
+Cloudflare Tunnel (https://apinoitu.khanhcs.id.vn)
   ↓
 Backend Docker (local machine)
   ↓
@@ -20,9 +22,35 @@ PostgreSQL + Redis
 
 ### Bước 1: Enable GitHub Pages
 
-1. Vào repo Settings: `https://github.com/[username]/demo_ci_cd/settings/pages`
+1. Vào repo Settings: `https://github.com/cs-khanh/demo_ci_cd/settings/pages`
 2. **Source**: Chọn **GitHub Actions**
 3. Save
+
+### Bước 1.5: Setup Custom Domain (Optional)
+
+**Nếu muốn dùng custom domain `noitu.khanhcs.id.vn`:**
+
+#### A. Cloudflare DNS:
+1. Vào Cloudflare Dashboard → DNS
+2. Add CNAME record:
+   ```
+   Type: CNAME
+   Name: noitu
+   Target: cs-khanh.github.io
+   Proxy: ✅ Proxied
+   TTL: Auto
+   ```
+
+#### B. GitHub Pages Settings:
+1. Vào repo Settings → Pages
+2. **Custom domain**: Nhập `noitu.khanhcs.id.vn`
+3. Click **Save**
+4. Đợi DNS check (~5-10 phút)
+5. ✅ Bật **Enforce HTTPS**
+
+**Sau khi setup xong, cả 2 URLs đều hoạt động:**
+- `https://noitu.khanhcs.id.vn/` ← Custom domain
+- `https://cs-khanh.github.io/demo_ci_cd/` ← Default
 
 ### Bước 2: Push code
 
@@ -33,8 +61,8 @@ git push origin main
 ```
 
 Workflow sẽ tự động chạy và deploy frontend lên:
-- `https://[username].github.io/demo_ci_cd/` (mặc định)
-- `https://noitu.khanhcs.id.vn` (custom domain)
+- `https://cs-khanh.github.io/demo_ci_cd/` (default)
+- `https://noitu.khanhcs.id.vn/` (custom domain - nếu đã setup)
 
 ---
 
@@ -99,19 +127,26 @@ sudo systemctl enable cloudflared
 
 ## 🔧 **4. Update CORS Origin**
 
-Nếu GitHub Pages domain khác, update trong `docker-compose.backend.yml`:
+**QUAN TRỌNG:** Update GitHub username trong `docker-compose.backend.yml`:
 
 ```yaml
 environment:
-  CORS_ORIGIN: https://[your-github-username].github.io,https://noitu.khanhcs.id.vn
+  # Allow both custom domain and GitHub Pages default
+  CORS_ORIGIN: https://noitu.khanhcs.id.vn,https://cs-khanh.github.io,http://localhost:5173
 ```
+
+Backend sẽ accept requests từ:
+- ✅ Custom domain: `noitu.khanhcs.id.vn`
+- ✅ GitHub Pages: `cs-khanh.github.io`
+- ✅ Local dev: `localhost:5173`
 
 ---
 
 ## ✅ **5. Verify Deployment**
 
 ### Frontend (GitHub Pages):
-- URL: `https://noitu.khanhcs.id.vn`
+- URL Default: `https://cs-khanh.github.io/demo_ci_cd/`
+- URL Custom: `https://noitu.khanhcs.id.vn/` (nếu đã setup)
 - Check: Trang web load được
 
 ### Backend (Cloudflare Tunnel):
@@ -171,7 +206,7 @@ docker-compose -f docker-compose.backend.yml up -d
 cloudflared tunnel run noitu
 ```
 
-- Frontend: `https://noitu.khanhcs.id.vn` (GitHub Pages)
+- Frontend: `https://noitu.khanhcs.id.vn/` hoặc `https://cs-khanh.github.io/demo_ci_cd/` (GitHub Pages)
 - Backend: `https://apinoitu.khanhcs.id.vn` (Cloudflare Tunnel)
 
 ---

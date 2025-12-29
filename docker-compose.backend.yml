@@ -50,8 +50,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       JWT_SECRET: your-super-secret-jwt-key
-      # Allow GitHub Pages domain
-      CORS_ORIGIN: https://cs-khanh.github.io,https://noitu.khanhcs.id.vn
+      # Allow both custom domain and GitHub Pages default
+      CORS_ORIGIN: https://noitu.khanhcs.id.vn,https://cs-khanh.github.io,http://localhost:5173
     ports:
       - "4000:4000"
     depends_on:

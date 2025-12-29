@@ -49,9 +49,11 @@ jobs:
       - name: Build frontend
         working-directory: ./frontend
         env:
-          # Backend API URLs (Cloudflare Tunnel)
+          # Backend API URLs (Cloudflare Tunnel - local machine)
           VITE_API_URL: https://apinoitu.khanhcs.id.vn
           VITE_WS_URL: https://apinoitu.khanhcs.id.vn
+          # For GitHub Pages base path
+          BASE_URL: /demo_ci_cd/
         run: npm run build
       
       - name: Setup Pages
