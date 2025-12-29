@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // Base path for GitHub Pages: https://username.github.io/demo_ci_cd/
+  // Base path for GitHub Pages: https://cs-khanh.github.io/game_noi_tu/
   base: process.env.BASE_URL || '/',
   server: {
     host: true,

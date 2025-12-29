@@ -56,6 +56,27 @@ jobs:
           BASE_URL: /game_noi_tu/
         run: npm run build
       
+      - name: Create 404.html and .nojekyll for SPA routing
+        working-directory: ./frontend/dist
+        run: |
+          # Create .nojekyll to disable Jekyll processing
+          # This ensures GitHub Pages serves files as-is without Jekyll transformation
+          touch .nojekyll
+          
+          # Copy index.html to 404.html for GitHub Pages SPA support
+          # When user refreshes on any route (e.g., /game/abc123), GitHub Pages will serve 404.html
+          # which will load the React app and React Router (with basename) will handle the route
+          cp index.html 404.html
+          
+          # Verify files were created
+          if [ ! -f ".nojekyll" ] || [ ! -f "404.html" ]; then
+            echo "❌ Error: Failed to create .nojekyll or 404.html"
+            exit 1
+          fi
+          
+          echo "✅ Created .nojekyll and 404.html for SPA routing"
+          ls -la | grep -E "(\.nojekyll|404\.html|index\.html)"
+      
       - name: Setup Pages
         uses: actions/configure-pages@v5
       
