@@ -95,6 +95,18 @@ function GamePage() {
       setCurrentWord(word)
     })
 
+    // Word changed
+    socket.on('word_changed', ({ newWord, wordsChain, changeWordUsed }) => {
+      setWordsHistory(wordsChain || [])
+      setCurrentWord(newWord)
+      // Update player's changeWordUsed status
+      setPlayers(prevPlayers => 
+        prevPlayers.map(p => 
+          p.id === myId ? { ...p, changeWordUsed } : p
+        )
+      )
+    })
+
     // Timer tick
     socket.on('timer_tick', ({ timeLeft: tl }) => {
       setTimeLeft(tl)
@@ -107,14 +119,15 @@ function GamePage() {
     })
 
     // Voting started
-    socket.on('voting_started', ({ word, proposedBy, proposedByName, timeLeft: tl }) => {
+    socket.on('voting_started', ({ word, proposedBy, proposedByName, timeLeft: tl, isChangeWord }) => {
       setVotingData({
         word,
         proposedById: proposedBy,
         proposedBy: proposedByName,
         votesFor: 0,
         votesAgainst: 0,
-        timeLeft: tl
+        timeLeft: tl,
+        isChangeWord: isChangeWord || false
       })
     })
 
@@ -165,6 +178,24 @@ function GamePage() {
     }
   }
 
+  const handleChangeWordStarted = () => {
+    if (socketRef.current) {
+      socketRef.current.emit('change_word_started', { roomId })
+    }
+  }
+
+  const handleChangeWordCancelled = () => {
+    if (socketRef.current) {
+      socketRef.current.emit('change_word_cancelled', { roomId })
+    }
+  }
+
+  const handleChangeWord = (newWord) => {
+    if (socketRef.current) {
+      socketRef.current.emit('change_word', { roomId, newWord })
+    }
+  }
+
   const handleVote = (vote) => {
     if (socketRef.current) {
       socketRef.current.emit('vote', { roomId, vote })
@@ -182,6 +213,10 @@ function GamePage() {
   const myPlayer = players.find(p => p.id === myId)
   const isHost = myPlayer?.isHost || false
   const isSpectator = myPlayer?.isSpectator || false
+  
+  // Check if all non-host players are ready
+  const allPlayersReady = players.length >= 2 && 
+    players.filter(p => !p.isHost).every(p => p.isReady === true)
 
   return (
     <div className="min-h-screen p-4">
@@ -258,19 +293,21 @@ function GamePage() {
               <div className="space-y-3">
                 <button
                   onClick={handleStartGame}
-                  disabled={players.length < 2}
+                  disabled={!allPlayersReady}
                   className={`w-full py-3 px-6 rounded-lg font-semibold text-white ${
-                    players.length >= 2
+                    allPlayersReady
                       ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
                       : 'bg-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  {players.length >= 2 ? '🎮 Bắt đầu game' : '⏳ Chờ thêm người chơi...'}
+                  {allPlayersReady ? '🎮 Bắt đầu game' : '⏳ Chờ người chơi sẵn sàng...'}
                 </button>
                 <p className="text-center text-sm text-gray-500">
                   {players.length < 2 
                     ? 'Cần ít nhất 2 người chơi để bắt đầu'
-                    : `${players.length} người chơi đã sẵn sàng`}
+                    : allPlayersReady
+                    ? 'Tất cả người chơi đã sẵn sàng!'
+                    : `Đang chờ ${players.filter(p => !p.isHost && !p.isReady).map(p => p.username).join(', ')} sẵn sàng...`}
                 </p>
               </div>
             ) : (
@@ -357,6 +394,10 @@ function GamePage() {
                 isMyTurn={isMyTurn && !isSpectator}
                 myPlayer={myPlayer}
                 onSubmitWord={handleSubmitWord}
+                onChangeWord={handleChangeWord}
+                onChangeWordStarted={handleChangeWordStarted}
+                onChangeWordCancelled={handleChangeWordCancelled}
+                votingInProgress={!!votingData}
                 isSpectator={isSpectator}
               />
               

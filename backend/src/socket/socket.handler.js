@@ -84,12 +84,25 @@ module.exports = (io) => {
 
         // Kiểm tra xem người gọi có phải host không
         if (!room.isHost(socket.data.userId)) {
-          throw new Error('Only host can start the game');
+          throw new Error('Chỉ có chủ phòng mới có thể bắt đầu game');
         }
 
         // Kiểm tra số lượng người chơi
         if (room.players.length < 2) {
-          throw new Error('Need at least 2 players to start');
+          throw new Error('Cần ít nhất 2 người chơi để bắt đầu');
+        }
+
+        // Kiểm tra tất cả players (trừ host) phải ready
+        if (!room.allPlayersReady()) {
+          const notReadyPlayers = room.players
+            .filter(p => !p.isHost && !p.isReady)
+            .map(p => p.username);
+          throw new Error(`Các người chơi sau chưa sẵn sàng: ${notReadyPlayers.join(', ')}`);
+        }
+
+        // Kiểm tra game chưa bắt đầu
+        if (room.gameStarted) {
+          throw new Error('Game đã bắt đầu rồi');
         }
 
         // Start game
@@ -172,6 +185,181 @@ module.exports = (io) => {
 
       } catch (error) {
         logger.error('Error submitting word:', error);
+        socket.emit('error', { message: error.message });
+      }
+    });
+
+    // Pause timer when opening change word modal
+    socket.on('change_word_started', ({ roomId }) => {
+      try {
+        const room = rooms.get(roomId);
+        if (!room) {
+          throw new Error('Room not found');
+        }
+
+        if (!room.gameStarted) {
+          return;
+        }
+
+        const currentPlayer = room.getCurrentPlayer();
+        if (currentPlayer.id !== socket.data.userId) {
+          return;
+        }
+
+        // Pause timer when user starts changing word
+        room.pauseTurnTimer();
+        logger.info(`Timer paused for change word in room ${roomId}`);
+      } catch (error) {
+        logger.error('Error pausing timer for change word:', error);
+      }
+    });
+
+    // Resume timer when cancelling change word modal
+    socket.on('change_word_cancelled', ({ roomId }) => {
+      try {
+        const room = rooms.get(roomId);
+        if (!room) {
+          throw new Error('Room not found');
+        }
+
+        if (!room.gameStarted) {
+          return;
+        }
+
+        const currentPlayer = room.getCurrentPlayer();
+        if (currentPlayer.id !== socket.data.userId) {
+          return;
+        }
+
+        // Resume timer if it was paused
+        if (room.timerPaused) {
+          room.resumeTurnTimer(async () => {
+            // Time's up - disable current player
+            const cp = room.getCurrentPlayer();
+            room.disablePlayer(cp.id, 'Hết thời gian');
+
+            io.to(roomId).emit('player_disabled', {
+              playerId: cp.id,
+              reason: 'Hết thời gian'
+            });
+
+            // Move to next turn
+            await nextTurn(room, io);
+          });
+          logger.info(`Timer resumed after cancelling change word in room ${roomId}`);
+        }
+      } catch (error) {
+        logger.error('Error resuming timer after cancelling change word:', error);
+      }
+    });
+
+    // Change word (đổi từ cuối của chain)
+    socket.on('change_word', async ({ roomId, newWord }) => {
+      try {
+        const room = rooms.get(roomId);
+        if (!room) {
+          throw new Error('Room not found');
+        }
+
+        if (!room.gameStarted) {
+          throw new Error('Game not started');
+        }
+
+        const currentPlayer = room.getCurrentPlayer();
+        if (currentPlayer.id !== socket.data.userId) {
+          throw new Error('Not your turn');
+        }
+
+        // Timer should already be paused by change_word_started event
+
+        const player = room.getPlayer(socket.data.userId);
+        if (!player) {
+          throw new Error('Player not found');
+        }
+
+        if (player.changeWordUsed) {
+          throw new Error('Bạn đã sử dụng quyền đổi từ rồi');
+        }
+
+        if (room.wordsChain.length === 0) {
+          throw new Error('Không có từ nào để đổi');
+        }
+
+        // Validate new word format
+        const words = newWord.trim().split(' ');
+        if (words.length !== 2) {
+          throw new Error('Từ phải có đúng 2 chữ');
+        }
+
+        // Get the word before the last one (to check connection)
+        let previousWord = '';
+        if (room.wordsChain.length > 1) {
+          previousWord = room.wordsChain[room.wordsChain.length - 2].word;
+        }
+
+        // Validate new word can connect with previous word (if exists)
+        if (previousWord) {
+          const canConnect = gameService.canConnect(newWord.trim(), previousWord);
+          if (!canConnect) {
+            throw new Error('Từ mới phải nối được với từ trước đó');
+          }
+        }
+
+        // Check if new word was already used
+        const isUsed = gameService.isWordUsed(newWord.trim(), room.wordsChain);
+        if (isUsed) {
+          throw new Error('Từ này đã được sử dụng rồi');
+        }
+
+        // Check if new word exists in dictionary
+        const existsInDictionary = await dictionaryService.validateWord(newWord.trim());
+        
+        if (!existsInDictionary) {
+          // Word not in dictionary - start voting for change word
+          await startVotingForChangeWord(room, io, socket.data.userId, newWord.trim());
+          return;
+        }
+
+        // Word exists in dictionary - change word immediately
+        // Get old word before changing
+        const oldWord = room.getCurrentWord();
+
+        // Change the word
+        const changedWordData = room.changeWord(newWord.trim(), socket.data.userId);
+
+        // Broadcast word changed
+        io.to(roomId).emit('word_changed', {
+          oldWord: oldWord,
+          newWord: newWord.trim(),
+          playerId: socket.data.userId,
+          playerName: player.username,
+          wordsChain: room.wordsChain,
+          changeWordUsed: player.changeWordUsed
+        });
+
+        // Also update room to sync player states
+        io.to(roomId).emit('room_updated', {
+          players: room.players.map(p => ({
+            id: p.id,
+            username: p.username,
+            avatar: p.avatar,
+            isReady: p.isReady,
+            isHost: p.isHost,
+            isDisabled: p.isDisabled,
+            disabledReason: p.disabledReason,
+            isSpectator: p.isSpectator,
+            changeWordUsed: p.changeWordUsed,
+            wordsUsed: p.wordsUsed || 0
+          }))
+        });
+
+        // Move to next turn after successful word change
+        await nextTurn(room, io);
+
+        logger.info(`Word changed in room ${roomId} by ${player.username}`);
+
+      } catch (error) {
+        logger.error('Error changing word:', error);
         socket.emit('error', { message: error.message });
       }
     });
@@ -359,7 +547,8 @@ async function startVoting(room, io, playerId, word) {
     word1,
     word2,
     playerId,
-    playerName: room.getPlayer(playerId).username
+    playerName: room.getPlayer(playerId).username,
+    isChangeWord: false
   });
 
   // Broadcast voting started
@@ -382,6 +571,39 @@ async function startVoting(room, io, playerId, word) {
   room.votingTimeout = votingTimeout;
 }
 
+async function startVotingForChangeWord(room, io, playerId, word) {
+  const { word1, word2 } = gameService.splitWord(word);
+  
+  room.startVoting({
+    word,
+    word1,
+    word2,
+    playerId,
+    playerName: room.getPlayer(playerId).username,
+    isChangeWord: true  // Mark as change word voting
+  });
+
+  // Broadcast voting started for change word
+  io.to(room.id).emit('voting_started', {
+    word,
+    proposedBy: playerId,
+    proposedByName: room.getPlayer(playerId).username,
+    timeLeft: room.votingTimeSeconds,
+    isChangeWord: true
+  });
+
+  // Start voting timer
+  const votingTimeout = setTimeout(async () => {
+    if (room.votingInProgress) {
+      logger.info(`Change word voting timeout reached for room ${room.id}`);
+      await endVoting(room, io);
+    }
+  }, room.votingTimeSeconds * 1000);
+  
+  // Store timeout reference to clear if needed
+  room.votingTimeout = votingTimeout;
+}
+
 async function endVoting(room, io) {
   // Clear voting timeout if it exists
   if (room.votingTimeout) {
@@ -395,57 +617,113 @@ async function endVoting(room, io) {
   );
 
   const votingData = room.endVoting();
+  const isChangeWord = votingData.isChangeWord || false;
 
   // Broadcast voting ended
   io.to(room.id).emit('voting_ended', {
     word: votingData.word,
     approved: result,
     votesFor: votingData.votesFor,
-    votesAgainst: votingData.votesAgainst
+    votesAgainst: votingData.votesAgainst,
+    isChangeWord: isChangeWord
   });
 
-  if (result) {
-    // Word approved - add to chain
-    room.addWordToChain({
-      word: votingData.word,
-      playerId: votingData.playerId,
-      playerName: votingData.playerName,
-      timestamp: new Date().toISOString(),
-      isNew: true,
-      turnNumber: room.turnNumber
-    });
+  if (isChangeWord) {
+    // Handle change word voting
+    const player = room.getPlayer(votingData.playerId);
+    
+    if (result) {
+      // Word approved - change the word
+      const oldWord = room.getCurrentWord();
+      room.changeWord(votingData.word, votingData.playerId);
 
-    // Add to community dictionary (approved immediately)
-    await dictionaryService.addCommunityWord(
-      votingData.word,
-      votingData.word1,
-      votingData.word2,
-      'Từ do cộng đồng đóng góp',
-      votingData.playerId,
-      true  // approved = true, add to main dictionary
-    );
+      // Add to community dictionary (approved immediately)
+      await dictionaryService.addCommunityWord(
+        votingData.word,
+        votingData.word1,
+        votingData.word2,
+        'Từ do cộng đồng đóng góp',
+        votingData.playerId,
+        true  // approved = true, add to main dictionary
+      );
 
-    io.to(room.id).emit('word_submitted', {
-      word: votingData.word,
-      playerId: votingData.playerId,
-      playerName: votingData.playerName,
-      wordsChain: room.wordsChain,
-      isNew: true
-    });
+      // Broadcast word changed
+      io.to(room.id).emit('word_changed', {
+        oldWord: oldWord,
+        newWord: votingData.word,
+        playerId: votingData.playerId,
+        playerName: votingData.playerName,
+        wordsChain: room.wordsChain,
+        changeWordUsed: player.changeWordUsed
+      });
 
-    // Next turn
-    await nextTurn(room, io);
+      // Update room to sync player states
+      io.to(room.id).emit('room_updated', {
+        players: room.players.map(p => ({
+          id: p.id,
+          username: p.username,
+          avatar: p.avatar,
+          isReady: p.isReady,
+          isHost: p.isHost,
+          isDisabled: p.isDisabled,
+          disabledReason: p.disabledReason,
+          isSpectator: p.isSpectator,
+          changeWordUsed: p.changeWordUsed,
+          wordsUsed: p.wordsUsed || 0
+        }))
+      });
+
+      // Move to next turn after successful word change
+      await nextTurn(room, io);
+    } else {
+      // Word rejected - move to next turn (player already used change word attempt)
+      await nextTurn(room, io);
+    }
   } else {
-    // Word rejected - disable player
-    room.disablePlayer(votingData.playerId, 'Từ bị vote từ chối');
+    // Handle normal word submission voting
+    if (result) {
+      // Word approved - add to chain
+      room.addWordToChain({
+        word: votingData.word,
+        playerId: votingData.playerId,
+        playerName: votingData.playerName,
+        timestamp: new Date().toISOString(),
+        isNew: true,
+        turnNumber: room.turnNumber
+      });
 
-    io.to(room.id).emit('player_disabled', {
-      playerId: votingData.playerId,
-      reason: 'Từ bị vote từ chối'
-    });
+      // Add to community dictionary (approved immediately)
+      await dictionaryService.addCommunityWord(
+        votingData.word,
+        votingData.word1,
+        votingData.word2,
+        'Từ do cộng đồng đóng góp',
+        votingData.playerId,
+        true  // approved = true, add to main dictionary
+      );
 
-    // Next turn
-    await nextTurn(room, io);
+      io.to(room.id).emit('word_submitted', {
+        word: votingData.word,
+        playerId: votingData.playerId,
+        playerName: votingData.playerName,
+        wordsChain: room.wordsChain,
+        isNew: true
+      });
+
+      // Next turn
+      await nextTurn(room, io);
+    } else {
+      // Word rejected - disable player
+      room.disablePlayer(votingData.playerId, 'Từ bị vote từ chối');
+
+      io.to(room.id).emit('player_disabled', {
+        playerId: votingData.playerId,
+        reason: 'Từ bị vote từ chối'
+      });
+
+      // Next turn
+      await nextTurn(room, io);
+    }
   }
 }
 

@@ -18,6 +18,9 @@ class Room {
     this.turnTimeSeconds = parseInt(process.env.TURN_TIME_SECONDS) || 10;
     this.votingTimeSeconds = parseInt(process.env.VOTING_TIME_SECONDS) || 30;
     this.turnTimeLeft = this.turnTimeSeconds * 1000;
+    this.timerPaused = false;
+    this.timerPausedAt = null;
+    this.timerPausedTimeLeft = null;
     this.createdAt = new Date();
   }
 
@@ -50,6 +53,12 @@ class Room {
     } else {
       player.isSpectator = false;
     }
+
+    // Initialize change word used flag
+    player.changeWordUsed = false;
+    
+    // Initialize ready status (default: false)
+    player.isReady = false;
 
     this.players.push(player);
     logger.info(`Player ${player.username} added to room ${this.id}`);
@@ -86,9 +95,15 @@ class Room {
   }
 
   allPlayersReady() {
-    // Chỉ kiểm tra số lượng người chơi, không cần tất cả ready
-    // Host sẽ quyết định khi nào start
-    return this.players.length >= 2;
+    // Kiểm tra số lượng người chơi
+    if (this.players.length < 2) {
+      return false;
+    }
+    
+    // Kiểm tra tất cả players (trừ host) phải ready
+    // Host không cần ready vì host là người start game
+    const nonHostPlayers = this.players.filter(p => !p.isHost);
+    return nonHostPlayers.every(p => p.isReady === true);
   }
   
   isHost(playerId) {
@@ -155,6 +170,38 @@ class Room {
     }
   }
 
+  // Change the last word in chain (used when player can't continue)
+  changeWord(newWord, playerId) {
+    if (this.wordsChain.length === 0) {
+      throw new Error('No words in chain to change');
+    }
+
+    const player = this.getPlayer(playerId);
+    if (!player) {
+      throw new Error('Player not found');
+    }
+
+    if (player.changeWordUsed) {
+      throw new Error('Change word already used');
+    }
+
+    // Update the last word in chain
+    const lastWordIndex = this.wordsChain.length - 1;
+    this.wordsChain[lastWordIndex] = {
+      ...this.wordsChain[lastWordIndex],
+      word: newWord,
+      changedBy: playerId,
+      changedByPlayer: player.username,
+      changedAt: new Date().toISOString()
+    };
+
+    // Mark player as used change word
+    player.changeWordUsed = true;
+
+    logger.info(`Word changed in room ${this.id} by ${player.username}: ${newWord}`);
+    return this.wordsChain[lastWordIndex];
+  }
+
   nextTurn() {
     this.clearTurnTimer();
     this.turnNumber++;
@@ -194,6 +241,58 @@ class Room {
     this.timerUpdateInterval = updateInterval;
   }
 
+  pauseTurnTimer() {
+    if (this.turnTimer && !this.timerPaused) {
+      // Clear interval first to stop updating turnTimeLeft
+      if (this.timerUpdateInterval) {
+        clearInterval(this.timerUpdateInterval);
+        this.timerUpdateInterval = null;
+      }
+      
+      // Save current time left (after stopping interval updates)
+      this.timerPausedTimeLeft = this.turnTimeLeft;
+      this.timerPausedAt = Date.now();
+      this.timerPaused = true;
+      
+      // Clear timeout
+      if (this.turnTimer) {
+        clearTimeout(this.turnTimer);
+        this.turnTimer = null;
+      }
+      
+      logger.info(`Timer paused in room ${this.id}, time left: ${this.timerPausedTimeLeft}ms`);
+    }
+  }
+
+  resumeTurnTimer(callback) {
+    if (this.timerPaused && this.timerPausedTimeLeft > 0) {
+      this.timerPaused = false;
+      const timeLeft = this.timerPausedTimeLeft;
+      this.timerPausedTimeLeft = null;
+      this.timerPausedAt = null;
+      
+      // Restart timer with remaining time
+      const startTime = Date.now();
+      this.turnTimer = setTimeout(() => {
+        callback();
+      }, timeLeft);
+
+      // Update time left periodically
+      const updateInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        this.turnTimeLeft = Math.max(0, timeLeft - elapsed);
+        
+        if (this.turnTimeLeft === 0) {
+          clearInterval(updateInterval);
+        }
+      }, 100);
+
+      this.timerUpdateInterval = updateInterval;
+      
+      logger.info(`Timer resumed in room ${this.id}, time left: ${timeLeft}ms`);
+    }
+  }
+
   clearTurnTimer() {
     if (this.turnTimer) {
       clearTimeout(this.turnTimer);
@@ -207,6 +306,9 @@ class Room {
       clearInterval(this.timerUpdateInterval);
       this.timerUpdateInterval = null;
     }
+    this.timerPaused = false;
+    this.timerPausedAt = null;
+    this.timerPausedTimeLeft = null;
   }
 
   // Voting management
