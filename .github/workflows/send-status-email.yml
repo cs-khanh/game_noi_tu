@@ -233,19 +233,35 @@ jobs:
             echo 'EMAIL_EOF'
           } >> $GITHUB_OUTPUT
       
+    #   - name: Send email via SMTP
+    #     uses: dawidd6/action-send-mail@v3
+    #     if: env.SMTP_SERVER != ''
+    #     env:
+    #       SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+    #     with:
+    #       server_address: ${{ secrets.SMTP_SERVER }}
+    #       server_port: ${{ secrets.SMTP_PORT }}
+    #       username: ${{ secrets.SMTP_USERNAME }}
+    #       password: ${{ secrets.SMTP_PASSWORD }}
+    #       subject: |
+    #         ${{ steps.workflow-type.outputs.emoji }} [${{ steps.workflow-type.outputs.type }}] ${{ steps.workflow-type.outputs.status_text }} - Game Nối Từ
+    #       to: ${{ secrets.EMAIL_TO }}
+    #       from: ${{ secrets.EMAIL_FROM }}
+    #       body: ${{ steps.email-body.outputs.body }}
+    #       content_type: text/html
       - name: Send email via SMTP
         uses: dawidd6/action-send-mail@v3
-        if: env.SMTP_SERVER != ''
+        if: ${{ env.SMTP_SERVER != '' }}
         env:
-          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+            SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: |
-            ${{ steps.workflow-type.outputs.emoji }} [${{ steps.workflow-type.outputs.type }}] ${{ steps.workflow-type.outputs.status_text }} - Game Nối Từ
-          to: ${{ secrets.EMAIL_TO }}
-          from: ${{ secrets.EMAIL_FROM }}
-          body: ${{ steps.email-body.outputs.body }}
-          content_type: text/html
+            server_address: ${{ secrets.SMTP_SERVER }}
+            server_port: ${{ secrets.SMTP_PORT }}
+            secure: true
+            username: ${{ secrets.SMTP_USERNAME }}
+            password: ${{ secrets.SMTP_PASSWORD }}
+            subject: ${{ steps.workflow-type.outputs.emoji }} [${{ steps.workflow-type.outputs.type }}] ${{ steps.workflow-type.outputs.status_text }} - Game Nối Từ
+            to: ${{ secrets.EMAIL_TO }}
+            from: ${{ secrets.EMAIL_FROM }}
+            html_body: file://email_body.html
+  
