@@ -1,11 +1,12 @@
 name: Send CI/CD Status Email
 
 on:
-  # Trigger sau khi CI workflow hoàn thành
-  # Lưu ý: GitHub Actions chỉ cho phép 1 workflow_run trigger
-  # Để trigger từ CD và Pages, chúng ta sẽ thêm jobs vào cuối các workflow đó
+  # Trigger sau khi các workflow CI, CD, Pages hoàn thành
   workflow_run:
-    workflows: ["CI - Continuous Integration"]
+    workflows:
+      - "CI - Continuous Integration"
+      - "CD - Continuous Deployment"
+      - "Deploy static content to Pages"
     types:
       - completed
   
@@ -59,7 +60,7 @@ jobs:
             WORKFLOW_STATUS="${{ github.event.workflow_run.conclusion }}"
             COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
             COMMIT_MSG=$(git log -1 --pretty=format:"%s" $COMMIT_SHA 2>/dev/null || echo "N/A")
-            ACTOR="${{ github.event.workflow_run.actor }}"
+            ACTOR="${{ github.event.workflow_run.actor.login }}"
             BRANCH="${{ github.event.workflow_run.head_branch }}"
             RUN_URL="${{ github.event.workflow_run.html_url }}"
           fi
@@ -221,6 +222,17 @@ jobs:
           </html>
           EOF
       
+      - name: Read email body
+        id: email-body
+        run: |
+          # Đọc file và escape đúng cách cho multiline
+          EMAIL_CONTENT=$(cat email_body.html)
+          {
+            echo 'body<<EMAIL_EOF'
+            echo "$EMAIL_CONTENT"
+            echo 'EMAIL_EOF'
+          } >> $GITHUB_OUTPUT
+      
       - name: Send email via SMTP
         uses: dawidd6/action-send-mail@v3
         if: env.SMTP_SERVER != ''
@@ -235,5 +247,5 @@ jobs:
             ${{ steps.workflow-type.outputs.emoji }} [${{ steps.workflow-type.outputs.type }}] ${{ steps.workflow-type.outputs.status_text }} - Game Nối Từ
           to: ${{ secrets.EMAIL_TO }}
           from: ${{ secrets.EMAIL_FROM }}
-          body_path: email_body.html
+          body: ${{ steps.email-body.outputs.body }}
           content_type: text/html

@@ -7,11 +7,6 @@ on:
     tags:
       - 'v*'  # Trigger khi có tag v1.0.0, v2.1.0, etc.
 
-# Permissions để cho phép trigger workflow khác
-permissions:
-  contents: read
-  actions: write
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME_BACKEND: ${{ github.repository }}-backend
@@ -70,29 +65,6 @@ jobs:
           echo "📢 Staging deployment completed!"
           echo "Deployed by: ${{ github.actor }}"
           echo "Commit: ${{ github.sha }}"
-      
-      - name: Trigger email notification
-        uses: actions/github-script@v7
-        if: always()
-        with:
-          script: |
-            const status = '${{ job.status }}' === 'success' ? 'success' : 'failure';
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'send-status-email.yml',
-                ref: context.ref,
-                inputs: {
-                  workflow_name: 'CD - Continuous Deployment',
-                  workflow_status: status
-                }
-              });
-              console.log('✅ Email notification workflow triggered successfully');
-            } catch (error) {
-              console.error('❌ Failed to trigger email notification:', error.message);
-              // Không fail job nếu trigger email thất bại
-            }
 
   # Build and Push Docker Images (khi có tag)
   build-and-push-images:
@@ -231,29 +203,6 @@ jobs:
           echo "Version: ${{ steps.version.outputs.VERSION }}"
           # Send notification to Slack/Discord
           # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} -H 'Content-Type: application/json' -d '{"text":"✅ Deployed v${{ steps.version.outputs.VERSION }} to production"}'
-      
-      - name: Trigger email notification
-        uses: actions/github-script@v7
-        if: always()
-        with:
-          script: |
-            const status = '${{ job.status }}' === 'success' ? 'success' : 'failure';
-            try {
-              await github.rest.actions.createWorkflowDispatch({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'send-status-email.yml',
-                ref: context.ref,
-                inputs: {
-                  workflow_name: 'CD - Continuous Deployment',
-                  workflow_status: status
-                }
-              });
-              console.log('✅ Email notification workflow triggered successfully');
-            } catch (error) {
-              console.error('❌ Failed to trigger email notification:', error.message);
-              // Không fail job nếu trigger email thất bại
-            }
 
   # Rollback deployment (manual trigger)
   rollback:
