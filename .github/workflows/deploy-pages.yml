@@ -89,4 +89,20 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      
+      - name: Trigger email notification
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'send-status-email.yml',
+              ref: context.ref,
+              inputs: {
+                workflow_name: 'Deploy static content to Pages',
+                workflow_status: '${{ job.status }}' === 'success' ? 'success' : 'failure'
+              }
+            });
 

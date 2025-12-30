@@ -1,39 +1,68 @@
 name: Send CI/CD Status Email
 
 on:
-  # Trigger sau khi bất kỳ workflow nào hoàn thành
-  # Chúng ta sẽ filter trong job để chỉ gửi email cho CI, CD, và Pages
+  # Trigger sau khi CI workflow hoàn thành
+  # Lưu ý: GitHub Actions chỉ cho phép 1 workflow_run trigger
+  # Để trigger từ CD và Pages, chúng ta sẽ thêm jobs vào cuối các workflow đó
   workflow_run:
+    workflows: ["CI - Continuous Integration"]
     types:
       - completed
+  
+  # Cho phép trigger thủ công để test
+  workflow_dispatch:
+    inputs:
+      workflow_name:
+        description: 'Workflow name to simulate'
+        required: false
+        default: 'CI - Continuous Integration'
+      workflow_status:
+        description: 'Workflow status'
+        required: false
+        default: 'success'
+        type: choice
+        options:
+          - success
+          - failure
+          - cancelled
 
 jobs:
   send-email:
     name: Send Status Email
     runs-on: ubuntu-latest
-    # Chỉ chạy khi workflow không bị skip và là một trong các workflow chúng ta quan tâm
+    # Chỉ chạy khi workflow không bị skip
     if: |
-      github.event.workflow_run.conclusion != 'skipped' &&
-      (github.event.workflow_run.name == 'CI - Continuous Integration' ||
-       github.event.workflow_run.name == 'CD - Continuous Deployment' ||
-       github.event.workflow_run.name == 'Deploy static content to Pages')
+      (github.event_name == 'workflow_dispatch' || 
+       github.event.workflow_run.conclusion != 'skipped')
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || github.event.workflow_run.head_sha }}
       
       - name: Get workflow details
         id: workflow-info
         run: |
-          WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
-          WORKFLOW_STATUS="${{ github.event.workflow_run.conclusion }}"
-          COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
-          COMMIT_MSG=$(git log -1 --pretty=format:"%s" $COMMIT_SHA 2>/dev/null || echo "N/A")
-          ACTOR="${{ github.event.workflow_run.actor }}"
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
-          RUN_URL="${{ github.event.workflow_run.html_url }}"
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            # Manual trigger
+            WORKFLOW_NAME="${{ github.event.inputs.workflow_name }}"
+            WORKFLOW_STATUS="${{ github.event.inputs.workflow_status }}"
+            COMMIT_SHA="${{ github.sha }}"
+            COMMIT_MSG=$(git log -1 --pretty=format:"%s" $COMMIT_SHA 2>/dev/null || echo "Manual trigger")
+            ACTOR="${{ github.actor }}"
+            BRANCH="${{ github.ref_name }}"
+            RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            # workflow_run trigger
+            WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+            WORKFLOW_STATUS="${{ github.event.workflow_run.conclusion }}"
+            COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
+            COMMIT_MSG=$(git log -1 --pretty=format:"%s" $COMMIT_SHA 2>/dev/null || echo "N/A")
+            ACTOR="${{ github.event.workflow_run.actor }}"
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+            RUN_URL="${{ github.event.workflow_run.html_url }}"
+          fi
           
           echo "workflow_name=$WORKFLOW_NAME" >> $GITHUB_OUTPUT
           echo "workflow_status=$WORKFLOW_STATUS" >> $GITHUB_OUTPUT
@@ -49,7 +78,7 @@ jobs:
           WORKFLOW_NAME="${{ steps.workflow-info.outputs.workflow_name }}"
           STATUS="${{ steps.workflow-info.outputs.workflow_status }}"
           
-          # Xác định loại workflow và màu sắc (kiểm tra chính xác tên workflow)
+          # Xác định loại workflow và màu sắc
           if [[ "$WORKFLOW_NAME" == "CI - Continuous Integration" ]]; then
             echo "type=CI" >> $GITHUB_OUTPUT
             echo "type_emoji=🎮" >> $GITHUB_OUTPUT

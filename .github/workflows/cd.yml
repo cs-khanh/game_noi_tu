@@ -65,6 +65,22 @@ jobs:
           echo "📢 Staging deployment completed!"
           echo "Deployed by: ${{ github.actor }}"
           echo "Commit: ${{ github.sha }}"
+      
+      - name: Trigger email notification
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'send-status-email.yml',
+              ref: context.ref,
+              inputs: {
+                workflow_name: 'CD - Continuous Deployment',
+                workflow_status: '${{ job.status }}' === 'success' ? 'success' : 'failure'
+              }
+            });
 
   # Build and Push Docker Images (khi có tag)
   build-and-push-images:
@@ -203,6 +219,22 @@ jobs:
           echo "Version: ${{ steps.version.outputs.VERSION }}"
           # Send notification to Slack/Discord
           # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} -H 'Content-Type: application/json' -d '{"text":"✅ Deployed v${{ steps.version.outputs.VERSION }} to production"}'
+      
+      - name: Trigger email notification
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'send-status-email.yml',
+              ref: context.ref,
+              inputs: {
+                workflow_name: 'CD - Continuous Deployment',
+                workflow_status: '${{ job.status }}' === 'success' ? 'success' : 'failure'
+              }
+            });
 
   # Rollback deployment (manual trigger)
   rollback:
