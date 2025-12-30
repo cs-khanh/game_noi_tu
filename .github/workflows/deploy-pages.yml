@@ -17,6 +17,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write  # Cần để trigger workflow email
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -95,14 +96,21 @@ jobs:
         if: always()
         with:
           script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'send-status-email.yml',
-              ref: context.ref,
-              inputs: {
-                workflow_name: 'Deploy static content to Pages',
-                workflow_status: '${{ job.status }}' === 'success' ? 'success' : 'failure'
-              }
-            });
+            const status = '${{ job.status }}' === 'success' ? 'success' : 'failure';
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'send-status-email.yml',
+                ref: context.ref,
+                inputs: {
+                  workflow_name: 'Deploy static content to Pages',
+                  workflow_status: status
+                }
+              });
+              console.log('✅ Email notification workflow triggered successfully');
+            } catch (error) {
+              console.error('❌ Failed to trigger email notification:', error.message);
+              // Không fail job nếu trigger email thất bại
+            }
 
