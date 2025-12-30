@@ -107,20 +107,32 @@ function HomePage() {
           <h3 className="font-bold text-gray-800 mb-3">📖 Luật chơi:</h3>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-start">
-              <span className="mr-2">⏱️</span>
-              <span>Mỗi lượt có <strong>10 giây</strong> để trả lời</span>
+              <span className="mr-2">📝</span>
+              <span>Chỉ dùng <strong>tiếng Việt</strong>, mỗi lượt là <strong>cụm 2 từ</strong></span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">🎯</span>
-              <span>Nối từ cuối của cụm trước thành từ đầu cụm mới</span>
+              <span>Từ đầu của cụm mới phải trùng với <strong>từ cuối</strong> của cụm trước</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">⏱️</span>
+              <span>Mỗi lượt có <strong>10 giây</strong>, hết giờ sẽ bị <strong>vô hiệu hóa</strong> cho các lượt sau</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">🔄</span>
+              <span>Mỗi người có <strong>1 lần Đổi từ</strong> trong 1 ván: đổi từ cuối chuỗi, sau đó chuyển ngay lượt cho người tiếp theo</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">🗳️</span>
-              <span>Từ mới cần {'>'}50% vote để chấp nhận</span>
+              <span>Từ không có trong từ điển sẽ được đem ra vote, cần {'>'}50% người chơi đồng ý để chấp nhận</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">👑</span>
+              <span>Chỉ <strong>chủ phòng</strong> được bắt đầu game và chỉ khi tất cả người chơi khác đã bấm <strong>Sẵn sàng</strong></span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">🏆</span>
-              <span>Người cuối cùng còn lại là Winner!</span>
+              <span>Game kết thúc khi chỉ còn <strong>1 người chưa bị vô hiệu hóa</strong></span>
             </li>
           </ul>
         </div>

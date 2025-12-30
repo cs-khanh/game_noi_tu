@@ -1,0 +1,210 @@
+name: Send CI/CD Status Email
+
+on:
+  # Trigger sau khi bất kỳ workflow nào hoàn thành
+  # Chúng ta sẽ filter trong job để chỉ gửi email cho CI, CD, và Pages
+  workflow_run:
+    types:
+      - completed
+
+jobs:
+  send-email:
+    name: Send Status Email
+    runs-on: ubuntu-latest
+    # Chỉ chạy khi workflow không bị skip và là một trong các workflow chúng ta quan tâm
+    if: |
+      github.event.workflow_run.conclusion != 'skipped' &&
+      (github.event.workflow_run.name == 'CI - Continuous Integration' ||
+       github.event.workflow_run.name == 'CD - Continuous Deployment' ||
+       github.event.workflow_run.name == 'Deploy static content to Pages')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      
+      - name: Get workflow details
+        id: workflow-info
+        run: |
+          WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+          WORKFLOW_STATUS="${{ github.event.workflow_run.conclusion }}"
+          COMMIT_SHA="${{ github.event.workflow_run.head_sha }}"
+          COMMIT_MSG=$(git log -1 --pretty=format:"%s" $COMMIT_SHA 2>/dev/null || echo "N/A")
+          ACTOR="${{ github.event.workflow_run.actor }}"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          RUN_URL="${{ github.event.workflow_run.html_url }}"
+          
+          echo "workflow_name=$WORKFLOW_NAME" >> $GITHUB_OUTPUT
+          echo "workflow_status=$WORKFLOW_STATUS" >> $GITHUB_OUTPUT
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "commit_msg=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "actor=$ACTOR" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "run_url=$RUN_URL" >> $GITHUB_OUTPUT
+      
+      - name: Determine workflow type and status
+        id: workflow-type
+        run: |
+          WORKFLOW_NAME="${{ steps.workflow-info.outputs.workflow_name }}"
+          STATUS="${{ steps.workflow-info.outputs.workflow_status }}"
+          
+          # Xác định loại workflow và màu sắc (kiểm tra chính xác tên workflow)
+          if [[ "$WORKFLOW_NAME" == "CI - Continuous Integration" ]]; then
+            echo "type=CI" >> $GITHUB_OUTPUT
+            echo "type_emoji=🎮" >> $GITHUB_OUTPUT
+            echo "header_color=linear-gradient(135deg, #667eea 0%, #764ba2 100%)" >> $GITHUB_OUTPUT
+            echo "border_color=#667eea" >> $GITHUB_OUTPUT
+            echo "button_color=#667eea" >> $GITHUB_OUTPUT
+            echo "type_name=Continuous Integration" >> $GITHUB_OUTPUT
+          elif [[ "$WORKFLOW_NAME" == "CD - Continuous Deployment" ]]; then
+            echo "type=CD" >> $GITHUB_OUTPUT
+            echo "type_emoji=🚀" >> $GITHUB_OUTPUT
+            echo "header_color=linear-gradient(135deg, #10b981 0%, #059669 100%)" >> $GITHUB_OUTPUT
+            echo "border_color=#10b981" >> $GITHUB_OUTPUT
+            echo "button_color=#10b981" >> $GITHUB_OUTPUT
+            echo "type_name=Continuous Deployment" >> $GITHUB_OUTPUT
+          elif [[ "$WORKFLOW_NAME" == "Deploy static content to Pages" ]]; then
+            echo "type=Pages" >> $GITHUB_OUTPUT
+            echo "type_emoji=📄" >> $GITHUB_OUTPUT
+            echo "header_color=linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" >> $GITHUB_OUTPUT
+            echo "border_color=#3b82f6" >> $GITHUB_OUTPUT
+            echo "button_color=#3b82f6" >> $GITHUB_OUTPUT
+            echo "type_name=GitHub Pages Deployment" >> $GITHUB_OUTPUT
+          else
+            # Fallback: kiểm tra bằng pattern matching
+            if [[ "$WORKFLOW_NAME" == *"CI"* ]] || [[ "$WORKFLOW_NAME" == *"Continuous Integration"* ]]; then
+              echo "type=CI" >> $GITHUB_OUTPUT
+              echo "type_emoji=🎮" >> $GITHUB_OUTPUT
+              echo "header_color=linear-gradient(135deg, #667eea 0%, #764ba2 100%)" >> $GITHUB_OUTPUT
+              echo "border_color=#667eea" >> $GITHUB_OUTPUT
+              echo "button_color=#667eea" >> $GITHUB_OUTPUT
+              echo "type_name=Continuous Integration" >> $GITHUB_OUTPUT
+            elif [[ "$WORKFLOW_NAME" == *"CD"* ]] || [[ "$WORKFLOW_NAME" == *"Continuous Deployment"* ]]; then
+              echo "type=CD" >> $GITHUB_OUTPUT
+              echo "type_emoji=🚀" >> $GITHUB_OUTPUT
+              echo "header_color=linear-gradient(135deg, #10b981 0%, #059669 100%)" >> $GITHUB_OUTPUT
+              echo "border_color=#10b981" >> $GITHUB_OUTPUT
+              echo "button_color=#10b981" >> $GITHUB_OUTPUT
+              echo "type_name=Continuous Deployment" >> $GITHUB_OUTPUT
+            elif [[ "$WORKFLOW_NAME" == *"Pages"* ]] || [[ "$WORKFLOW_NAME" == *"Deploy static"* ]]; then
+              echo "type=Pages" >> $GITHUB_OUTPUT
+              echo "type_emoji=📄" >> $GITHUB_OUTPUT
+              echo "header_color=linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" >> $GITHUB_OUTPUT
+              echo "border_color=#3b82f6" >> $GITHUB_OUTPUT
+              echo "button_color=#3b82f6" >> $GITHUB_OUTPUT
+              echo "type_name=GitHub Pages Deployment" >> $GITHUB_OUTPUT
+            else
+              echo "type=Other" >> $GITHUB_OUTPUT
+              echo "type_emoji=⚙️" >> $GITHUB_OUTPUT
+              echo "header_color=linear-gradient(135deg, #6b7280 0%, #4b5563 100%)" >> $GITHUB_OUTPUT
+              echo "border_color=#6b7280" >> $GITHUB_OUTPUT
+              echo "button_color=#6b7280" >> $GITHUB_OUTPUT
+              echo "type_name=Workflow" >> $GITHUB_OUTPUT
+            fi
+          fi
+          
+          # Xác định trạng thái
+          if [ "$STATUS" = "success" ]; then
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+            echo "color=green" >> $GITHUB_OUTPUT
+            echo "status_text=Thành công" >> $GITHUB_OUTPUT
+          elif [ "$STATUS" = "failure" ]; then
+            echo "emoji=❌" >> $GITHUB_OUTPUT
+            echo "color=red" >> $GITHUB_OUTPUT
+            echo "status_text=Thất bại" >> $GITHUB_OUTPUT
+          elif [ "$STATUS" = "cancelled" ]; then
+            echo "emoji=⚠️" >> $GITHUB_OUTPUT
+            echo "color=orange" >> $GITHUB_OUTPUT
+            echo "status_text=Đã hủy" >> $GITHUB_OUTPUT
+          else
+            echo "emoji=ℹ️" >> $GITHUB_OUTPUT
+            echo "color=gray" >> $GITHUB_OUTPUT
+            echo "status_text=Không xác định" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create email body
+        run: |
+          HEADER_COLOR="${{ steps.workflow-type.outputs.header_color }}"
+          BORDER_COLOR="${{ steps.workflow-type.outputs.border_color }}"
+          BUTTON_COLOR="${{ steps.workflow-type.outputs.button_color }}"
+          TYPE_EMOJI="${{ steps.workflow-type.outputs.type_emoji }}"
+          TYPE_NAME="${{ steps.workflow-type.outputs.type_name }}"
+          STATUS_COLOR="${{ steps.workflow-type.outputs.color }}"
+          STATUS_EMOJI="${{ steps.workflow-type.outputs.emoji }}"
+          STATUS_TEXT="${{ steps.workflow-type.outputs.status_text }}"
+          WORKFLOW_NAME="${{ steps.workflow-info.outputs.workflow_name }}"
+          BRANCH="${{ steps.workflow-info.outputs.branch }}"
+          COMMIT_SHA="${{ steps.workflow-info.outputs.commit_sha }}"
+          COMMIT_MSG="${{ steps.workflow-info.outputs.commit_msg }}"
+          ACTOR="${{ steps.workflow-info.outputs.actor }}"
+          RUN_URL="${{ steps.workflow-info.outputs.run_url }}"
+          REPO="${{ github.repository }}"
+          TIMESTAMP=$(date '+%d/%m/%Y %H:%M:%S')
+          
+          cat > email_body.html << EOF
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: ${HEADER_COLOR}; color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+              .content { background: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+              .status { font-size: 24px; font-weight: bold; margin: 10px 0; }
+              .info { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid ${BORDER_COLOR}; }
+              .info-item { margin: 8px 0; }
+              .footer { background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px; }
+              .button { display: inline-block; padding: 10px 20px; background: ${BUTTON_COLOR}; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px; }
+              code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>${TYPE_EMOJI} Game Nối Từ - ${TYPE_NAME}</h1>
+              </div>
+              <div class="content">
+                <div class="status" style="color: ${STATUS_COLOR};">
+                  ${STATUS_EMOJI} ${STATUS_TEXT}
+                </div>
+                <div class="info">
+                  <div class="info-item"><strong>Workflow:</strong> ${WORKFLOW_NAME}</div>
+                  <div class="info-item"><strong>Loại:</strong> ${TYPE_NAME}</div>
+                  <div class="info-item"><strong>Trạng thái:</strong> ${STATUS_TEXT}</div>
+                  <div class="info-item"><strong>Branch:</strong> ${BRANCH}</div>
+                  <div class="info-item"><strong>Commit:</strong> <code>${COMMIT_SHA}</code></div>
+                  <div class="info-item"><strong>Commit message:</strong> ${COMMIT_MSG}</div>
+                  <div class="info-item"><strong>Người thực hiện:</strong> ${ACTOR}</div>
+                  <div class="info-item"><strong>Thời gian:</strong> ${TIMESTAMP}</div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                  <a href="${RUN_URL}" class="button">Xem chi tiết trên GitHub</a>
+                </div>
+              </div>
+              <div class="footer">
+                <p>Email tự động từ GitHub Actions</p>
+                <p>Repository: ${REPO}</p>
+              </div>
+            </div>
+          </body>
+          </html>
+          EOF
+      
+      - name: Send email via SMTP
+        uses: dawidd6/action-send-mail@v3
+        if: env.SMTP_SERVER != ''
+        env:
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: |
+            ${{ steps.workflow-type.outputs.emoji }} [${{ steps.workflow-type.outputs.type }}] ${{ steps.workflow-type.outputs.status_text }} - Game Nối Từ
+          to: ${{ secrets.EMAIL_TO }}
+          from: ${{ secrets.EMAIL_FROM }}
+          body_path: email_body.html
+          content_type: text/html
